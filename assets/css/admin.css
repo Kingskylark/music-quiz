@@ -1,0 +1,95 @@
+/* ========================================
+   ADMIN STYLES
+======================================== */
+
+/* Admin Login Page */
+.admin-login-page {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--dark-bg) 100%);
+}
+
+.admin-card {
+    background: rgba(30, 58, 138, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.admin-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), #20c997);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse-icon 2s infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 20px rgba(40, 167, 69, 0);
+    }
+}
+
+.form-control,
+.input-group .form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.demo-credentials {
+    background: rgba(40, 167, 69, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Admin Dashboard */
+.admin-dashboard {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--dark-bg) 100%);
+    min-height: 100vh;
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(30, 58, 138, 0.3));
+    backdrop-filter: blur(10px);
+}
+
+/* Tables */
+.table-dark {
+    --bs-table-bg: transparent;
+}
+
+.table-dark tbody tr:hover {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+/* Navbar */
+.navbar-dark .navbar-nav .nav-link {
+    transition: all 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--primary-color) !important;
+    transform: translateY(-2px);
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
