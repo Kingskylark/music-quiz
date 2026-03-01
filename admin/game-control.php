@@ -89,6 +89,21 @@ $total_users = $conn->query("SELECT COUNT(*) as count FROM users")->fetch_assoc(
 $waiting_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'not_started'")->fetch_assoc()['count'];
 $playing_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'in_progress'")->fetch_assoc()['count'];
 $completed_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'completed'")->fetch_assoc()['count'];
+
+// Get current winners
+$winners_query = "SELECT u.id, u.name, u.nickname, u.score, u.total_time, u.prize_rank,
+                         p.payment_status, p.bank_name
+                  FROM users u
+                  LEFT JOIN payments p ON u.id = p.user_id
+                  WHERE u.is_winner = TRUE
+                  ORDER BY u.prize_rank ASC";
+$winners_result = $conn->query($winners_query);
+$current_winners = [];
+if ($winners_result) {
+    while ($w = $winners_result->fetch_assoc()) {
+        $current_winners[] = $w;
+    }
+}
 ?>
 
 
@@ -228,6 +243,7 @@ $completed_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE statu
                             </h3>
                             <?php if ($game_active): ?>
                                 <p class="text-success">Players can now start the quiz!</p>
+                                <p class="text-warning small"><i class="bi bi-info-circle me-1"></i>Stopping the game will automatically mark the top 3 players as winners</p>
                             <?php else: ?>
                                 <p class="text-light">Players are waiting for you to start the game</p>
                             <?php endif; ?>
@@ -306,24 +322,75 @@ $completed_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE statu
                 </div>
             </div>
 
+            <!-- Winners Section -->
             <div class="col-md-12 mt-4">
-    <div class="card bg-dark border-warning">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">
-                <i class="bi bi-trophy-fill me-2"></i>Mark Winners
-            </h5>
-        </div>
-        <div class="card-body">
-            <p class="text-light">Mark the top 3 players as winners and enable payment portal</p>
-            <form method="POST" action="">
-                <input type="hidden" name="action" value="mark_winners">
-                <button type="submit" class="btn btn-warning">
-                    <i class="bi bi-trophy me-2"></i>Mark Top 3 as Winners
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
+                <div class="card bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy-fill me-2"></i>Winners
+                        </h5>
+                        <form method="POST" action="" class="d-inline">
+                            <input type="hidden" name="action" value="mark_winners">
+                            <button type="submit" class="btn btn-dark btn-sm">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Re-mark Winners
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        <?php if (count($current_winners) > 0): ?>
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Player</th>
+                                            <th class="text-center">Score</th>
+                                            <th class="text-center">Time</th>
+                                            <th class="text-center">Prize</th>
+                                            <th class="text-center">Payment Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $medals = [1 => '1st', 2 => '2nd', 3 => '3rd'];
+                                        foreach ($current_winners as $w):
+                                            $prize = get_prize_amount($w['prize_rank']);
+                                            $status = $w['payment_status'] ?? 'awaiting';
+                                            $status_badge = [
+                                                'awaiting' => '<span class="badge bg-secondary">Awaiting Details</span>',
+                                                'pending' => '<span class="badge bg-warning text-dark">Submitted</span>',
+                                                'processing' => '<span class="badge bg-info">Processing</span>',
+                                                'completed' => '<span class="badge bg-success">Paid</span>',
+                                                'failed' => '<span class="badge bg-danger">Failed</span>',
+                                            ];
+                                        ?>
+                                        <tr>
+                                            <td><span class="fw-bold text-warning"><?php echo $medals[$w['prize_rank']] ?? $w['prize_rank']; ?></span></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($w['name']); ?></strong>
+                                                <?php if ($w['nickname']): ?>
+                                                    <br><small class="text-muted">"<?php echo htmlspecialchars($w['nickname']); ?>"</small>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-center"><?php echo $w['score']; ?>/<?php echo TOTAL_QUESTIONS; ?></td>
+                                            <td class="text-center"><?php echo format_time($w['total_time']); ?></td>
+                                            <td class="text-center text-success fw-bold"><?php echo number_format($prize); ?></td>
+                                            <td class="text-center"><?php echo $status_badge[$status] ?? $status_badge['awaiting']; ?></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="bi bi-trophy display-4 text-muted mb-3 d-block"></i>
+                                <p class="text-light mb-2">No winners marked yet.</p>
+                                <p class="text-muted small">Stop the game to automatically mark the top 3 players as winners, or click "Re-mark Winners" above.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

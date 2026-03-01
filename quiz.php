@@ -6,14 +6,13 @@ require_once 'includes/session.php';
 // Require user login
 require_user_login();
 
+// Check quiz status FIRST — completed users always go to results
+check_quiz_status();
 
-// Check if game is active
+// Then check if game is active for non-completed users
 if (!is_game_active()) {
-    // Redirect to waiting page
     redirect('waiting.php');
 }
-// Check quiz status
-check_quiz_status();
 
 // Get user data
 $user = get_user_data();

@@ -7,6 +7,12 @@ require_once 'includes/session.php';
 require_user_login();
 
 $user = get_user_data();
+
+// Completed users always go to results
+if ($user && $user['status'] === 'completed') {
+    redirect('results.php');
+}
+
 $page_title = "Waiting to Start";
 
 // If game becomes active, redirect to quiz
