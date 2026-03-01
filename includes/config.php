@@ -23,9 +23,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Database credentials
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');           // Change this to your MySQL username
-define('DB_PASS', '');               // Change this to your MySQL password
-define('DB_NAME', 'music_quiz_db');
+define('DB_USER', 'oghepmgn_id_rsa');           // Change this to your MySQL username
+define('DB_PASS', 'OCFoundation1');               // Change this to your MySQL password
+define('DB_NAME', 'oghepmgn_musicquiz');
 
 // Application settings
 define('QUIZ_TIME_PER_QUESTION', 20); // seconds
