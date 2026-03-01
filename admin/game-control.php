@@ -78,13 +78,31 @@ $waiting_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status 
 $playing_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'in_progress'")->fetch_assoc()['count'];
 $completed_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'completed'")->fetch_assoc()['count'];
 
-// Get current winners — simple query, no JOIN
+// Get current winners with payment details
 $current_winners = [];
-$winners_query = "SELECT id, name, nickname, score, total_time, prize_rank FROM users WHERE is_winner = 1 ORDER BY prize_rank ASC";
+$winners_query = "SELECT u.id, u.name, u.nickname, u.score, u.total_time, u.prize_rank,
+                         p.bank_name, p.account_number, p.account_name, p.payment_status
+                  FROM users u
+                  LEFT JOIN payments p ON u.id = p.user_id
+                  WHERE u.is_winner = 1
+                  ORDER BY u.prize_rank ASC";
 $winners_result = $conn->query($winners_query);
 if ($winners_result) {
     while ($w = $winners_result->fetch_assoc()) {
         $current_winners[] = $w;
+    }
+}
+// Fallback: if JOIN fails, try simple query
+if (!$winners_result) {
+    $winners_result2 = $conn->query("SELECT id, name, nickname, score, total_time, prize_rank FROM users WHERE is_winner = 1 ORDER BY prize_rank ASC");
+    if ($winners_result2) {
+        while ($w = $winners_result2->fetch_assoc()) {
+            $w['bank_name'] = null;
+            $w['account_number'] = null;
+            $w['account_name'] = null;
+            $w['payment_status'] = null;
+            $current_winners[] = $w;
+        }
     }
 }
 
@@ -202,7 +220,6 @@ if ($top3_q) {
                     </div>
                     <div class="card-body">
                         <?php if (count($current_winners) > 0): ?>
-                            <h6 class="text-success mb-3"><i class="bi bi-check-circle me-1"></i>Current Winners:</h6>
                             <div class="table-responsive">
                                 <table class="table table-dark table-hover mb-0">
                                     <thead>
@@ -210,26 +227,49 @@ if ($top3_q) {
                                             <th>Rank</th>
                                             <th>Player</th>
                                             <th class="text-center">Score</th>
-                                            <th class="text-center">Time</th>
                                             <th class="text-center">Prize</th>
+                                            <th>Bank Details</th>
+                                            <th class="text-center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($current_winners as $w):
                                             $medals = [1 => '1st Place', 2 => '2nd Place', 3 => '3rd Place'];
                                             $prize = get_prize_amount($w['prize_rank']);
+                                            $status = $w['payment_status'] ?? null;
+                                            $status_badges = [
+                                                'pending' => '<span class="badge bg-warning text-dark">Submitted</span>',
+                                                'processing' => '<span class="badge bg-info">Processing</span>',
+                                                'completed' => '<span class="badge bg-success">Paid</span>',
+                                                'failed' => '<span class="badge bg-danger">Failed</span>',
+                                            ];
                                         ?>
                                         <tr>
                                             <td><span class="fw-bold text-warning"><?php echo $medals[$w['prize_rank']] ?? $w['prize_rank']; ?></span></td>
                                             <td>
                                                 <strong><?php echo htmlspecialchars($w['name']); ?></strong>
                                                 <?php if (!empty($w['nickname'])): ?>
-                                                    <small class="text-muted ms-1">(<?php echo htmlspecialchars($w['nickname']); ?>)</small>
+                                                    <br><small class="text-muted">(<?php echo htmlspecialchars($w['nickname']); ?>)</small>
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-center"><?php echo $w['score']; ?>/<?php echo TOTAL_QUESTIONS; ?></td>
-                                            <td class="text-center"><?php echo format_time($w['total_time']); ?></td>
                                             <td class="text-center text-success fw-bold">₦<?php echo number_format($prize); ?></td>
+                                            <td>
+                                                <?php if (!empty($w['bank_name'])): ?>
+                                                    <strong><?php echo htmlspecialchars($w['bank_name']); ?></strong><br>
+                                                    <span class="text-light"><?php echo htmlspecialchars($w['account_number']); ?></span><br>
+                                                    <small class="text-muted"><?php echo htmlspecialchars($w['account_name']); ?></small>
+                                                <?php else: ?>
+                                                    <span class="text-muted"><i class="bi bi-clock me-1"></i>Awaiting submission</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php if ($status): ?>
+                                                    <?php echo $status_badges[$status] ?? '<span class="badge bg-secondary">'.$status.'</span>'; ?>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Not submitted</span>
+                                                <?php endif; ?>
+                                            </td>
                                         </tr>
                                         <?php endforeach; ?>
                                     </tbody>

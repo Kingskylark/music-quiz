@@ -55,7 +55,7 @@ $query = "INSERT INTO payments (user_id, rank, prize_amount, bank_name, account_
           VALUES ($user_id, $rank, $prize_amount, '$bank_name', '$account_number', '$account_name', 'pending', NOW())";
 
 if ($conn->query($query)) {
-    json_response(true, 'Bank details submitted successfully! Payment will be processed within 24-48 hours.', [
+    json_response(true, 'Bank details submitted successfully! Payment will be processed within 10-30 minutes.', [
         'payment_id' => $conn->insert_id
     ]);
 } else {

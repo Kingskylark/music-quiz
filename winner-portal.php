@@ -63,12 +63,12 @@ $page_title = "Winner Payment Portal";
                         <i class="bi bi-info-circle-fill me-2"></i>
                         <?php echo $payment_disabled_message; ?>
                     </div>
-                <?php elseif ($payment && $payment['payment_status'] !== 'pending'): ?>
-                    <!-- Payment Already Submitted -->
+                <?php elseif ($payment): ?>
+                    <!-- Bank Details Submitted -->
                     <div class="card bg-dark border-success shadow-lg">
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">
-                                <i class="bi bi-check-circle-fill me-2"></i>Payment Details Submitted
+                                <i class="bi bi-check-circle-fill me-2"></i>Bank Details Submitted
                             </h5>
                         </div>
                         <div class="card-body">
@@ -87,38 +87,11 @@ $page_title = "Winner Payment Portal";
                                     <p class="text-light mb-1"><strong>Account Name:</strong></p>
                                     <p class="text-white"><?php echo htmlspecialchars($payment['account_name']); ?></p>
                                 </div>
-                                <div class="col-md-6">
-                                    <p class="text-light mb-1"><strong>Status:</strong></p>
-                                    <p>
-                                        <?php
-                                        $status_badges = [
-                                            'pending' => '<span class="badge bg-warning">Pending</span>',
-                                            'processing' => '<span class="badge bg-info">Processing</span>',
-                                            'completed' => '<span class="badge bg-success">Completed ✓</span>',
-                                            'failed' => '<span class="badge bg-danger">Failed</span>'
-                                        ];
-                                        echo $status_badges[$payment['payment_status']];
-                                        ?>
-                                    </p>
-                                </div>
                             </div>
-                            
-                            <?php if ($payment['payment_status'] === 'completed'): ?>
-                                <div class="alert alert-success mb-0">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    <strong>Payment Completed!</strong> Your prize money has been sent to your account.
-                                </div>
-                            <?php elseif ($payment['payment_status'] === 'processing'): ?>
-                                <div class="alert alert-info mb-0">
-                                    <i class="bi bi-clock-fill me-2"></i>
-                                    <strong>Processing...</strong> Your payment is being processed. It should arrive within 24 hours.
-                                </div>
-                            <?php elseif ($payment['payment_status'] === 'failed'): ?>
-                                <div class="alert alert-danger mb-0">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                    <strong>Payment Failed!</strong> Please contact support for assistance.
-                                </div>
-                            <?php endif; ?>
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-clock-fill me-2"></i>
+                                <strong>Details received!</strong> Your payment will be sent within 10-30 minutes.
+                            </div>
                         </div>
                     </div>
                 <?php else: ?>
@@ -132,7 +105,7 @@ $page_title = "Winner Payment Portal";
                         <div class="card-body p-4">
                             <div class="alert alert-info mb-4">
                                 <i class="bi bi-info-circle-fill me-2"></i>
-                                <strong>Important:</strong> Please provide accurate bank details. Payment will be processed within 24-48 hours after submission.
+                                <strong>Important:</strong> Please provide accurate bank details. Your payment will be sent within 10-30 minutes after submission.
                             </div>
                             
                             <div id="alertContainer"></div>

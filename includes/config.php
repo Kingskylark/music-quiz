@@ -7,18 +7,13 @@ ini_set('display_errors', 1);
  * Database Configuration
  * Update these values according to your server setup
  */
-// Payment settings (CHANGE THESE!)
-define('PAYMENT_ENABLED', true); // Set to false to disable payments
-define('PAYMENT_GATEWAY', 'paystack'); // 'paystack' or 'flutterwave'
+// Payment settings
+define('PAYMENT_ENABLED', true);
 
 // Prize amounts (in NGN)
 define('FIRST_PRIZE', 10000);    // ₦10,000
 define('SECOND_PRIZE', 7000);   // ₦7,000
 define('THIRD_PRIZE', 5000);    // ₦5,000
-
-// Paystack Configuration (Get from https://dashboard.paystack.com/#/settings/developers)
-define('PAYSTACK_SECRET_KEY', 'sk_test_77462f4cc81a3c78565d15dd295580d5b94a342e'); // CHANGE THIS!
-define('PAYSTACK_PUBLIC_KEY', 'pk_test_3829b3251f0c9f7632f43a9d509837286f718c0d'); // CHANGE THIS!
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
