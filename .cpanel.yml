@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/$(whoami)/game.praisenight.ogheneyolecharityfoundation.org/
+    - /bin/cp -R * $DEPLOYPATH
