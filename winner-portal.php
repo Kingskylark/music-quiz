@@ -88,10 +88,18 @@ $page_title = "Winner Payment Portal";
                                     <p class="text-white"><?php echo htmlspecialchars($payment['account_name']); ?></p>
                                 </div>
                             </div>
+
+                            <?php if ($payment['payment_status'] === 'completed'): ?>
+                            <div class="alert alert-success mb-0">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>Payment Completed!</strong> Your prize of ₦<?php echo number_format($prize_amount, 2); ?> has been sent to your account.
+                            </div>
+                            <?php else: ?>
                             <div class="alert alert-info mb-0">
                                 <i class="bi bi-clock-fill me-2"></i>
                                 <strong>Details received!</strong> Your payment will be sent within 10-30 minutes.
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php else: ?>
