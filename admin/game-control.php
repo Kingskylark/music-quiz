@@ -17,12 +17,37 @@ $allow_registration = is_registration_allowed();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
-        
+
         if ($action === 'toggle_game') {
             $new_status = $game_active ? '0' : '1';
             update_game_setting('game_active', $new_status);
             $game_active = !$game_active;
-            $message = $game_active ? 'Game started successfully!' : 'Game stopped successfully!';
+
+            if (!$game_active) {
+                // Game just stopped — auto-mark top 3 winners
+                // First, clear any previous winners
+                $conn->query("UPDATE users SET is_winner = FALSE, prize_rank = NULL");
+
+                $top3_query = "SELECT id FROM users
+                               WHERE status = 'completed'
+                               ORDER BY score DESC, total_time ASC
+                               LIMIT 3";
+                $top3_result = $conn->query($top3_query);
+
+                $rank = 1;
+                while ($winner = $top3_result->fetch_assoc()) {
+                    $stmt = $conn->prepare("UPDATE users SET is_winner = TRUE, prize_rank = ? WHERE id = ?");
+                    $stmt->bind_param("ii", $rank, $winner['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    $rank++;
+                }
+
+                $winners_count = $rank - 1;
+                $message = "Game stopped successfully! $winners_count winner(s) marked automatically.";
+            } else {
+                $message = 'Game started successfully!';
+            }
         } elseif ($action === 'toggle_registration') {
             $new_status = $allow_registration ? '0' : '1';
             update_game_setting('allow_registration', $new_status);
@@ -34,24 +59,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->query("ALTER TABLE users AUTO_INCREMENT = 1");
             $conn->query("ALTER TABLE answers AUTO_INCREMENT = 1");
             $message = 'All users reset successfully!';
+        } elseif ($action === 'mark_winners') {
+            // Clear previous winners
+            $conn->query("UPDATE users SET is_winner = FALSE, prize_rank = NULL");
+
+            // Get top 3 users
+            $top3_query = "SELECT id FROM users
+                           WHERE status = 'completed'
+                           ORDER BY score DESC, total_time ASC
+                           LIMIT 3";
+            $top3_result = $conn->query($top3_query);
+
+            $rank = 1;
+            while ($winner = $top3_result->fetch_assoc()) {
+                $stmt = $conn->prepare("UPDATE users SET is_winner = TRUE, prize_rank = ? WHERE id = ?");
+                $stmt->bind_param("ii", $rank, $winner['id']);
+                $stmt->execute();
+                $stmt->close();
+                $rank++;
+            }
+
+            $message = 'Top 3 winners marked successfully!';
         }
-    }
-    elseif ($action === 'mark_winners') {
-        // Get top 3 users
-        $top3_query = "SELECT id FROM users 
-                       WHERE status = 'completed' 
-                       ORDER BY score DESC, total_time ASC 
-                       LIMIT 3";
-        $top3_result = $conn->query($top3_query);
-        
-        $rank = 1;
-        while ($winner = $top3_result->fetch_assoc()) {
-            $update = "UPDATE users SET is_winner = TRUE, prize_rank = $rank WHERE id = {$winner['id']}";
-            $conn->query($update);
-            $rank++;
-        }
-        
-        $message = 'Top 3 winners marked successfully!';
     }
 }
 

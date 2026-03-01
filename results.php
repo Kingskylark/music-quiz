@@ -61,7 +61,7 @@ $winner_info = is_winner($user['id']);
 if ($winner_info['is_winner'] && PAYMENT_ENABLED):
     $prize_amount = get_prize_amount($winner_info['rank']);
 ?>
-    <div class="alert alert-success mb-4 animate__animated animate__pulse">
+    <div id="winnerBanner" class="alert alert-success mb-4 animate__animated animate__pulse">
         <i class="bi bi-trophy-fill me-2"></i>
         <strong>You're a Winner!</strong> You've won ₦<?php echo number_format($prize_amount, 2); ?>!
         <br>
@@ -69,6 +69,9 @@ if ($winner_info['is_winner'] && PAYMENT_ENABLED):
             <i class="bi bi-bank me-2"></i>Claim Your Prize
         </a>
     </div>
+<?php else: ?>
+    <!-- Placeholder that will be filled by polling if user becomes a winner -->
+    <div id="winnerBanner" class="mb-4" style="display:none;"></div>
 <?php endif; ?>
                         
                         <!-- Stats Row -->
@@ -137,5 +140,31 @@ if ($winner_info['is_winner'] && PAYMENT_ENABLED):
 </div>
 
 
+
+<?php if (!$winner_info['is_winner'] && PAYMENT_ENABLED): ?>
+<script>
+// Poll every 5 seconds to check if this user has been marked as a winner
+(function() {
+    let winnerCheckInterval = setInterval(function() {
+        fetch('api/check-winner-status.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data.is_winner) {
+                    clearInterval(winnerCheckInterval);
+                    const banner = document.getElementById('winnerBanner');
+                    const amount = Number(data.data.prize_amount).toLocaleString('en-NG', {minimumFractionDigits: 2});
+                    banner.className = 'alert alert-success mb-4 animate__animated animate__pulse';
+                    banner.innerHTML = '<i class="bi bi-trophy-fill me-2"></i>' +
+                        '<strong>You\'re a Winner!</strong> You\'ve won \u20A6' + amount + '!' +
+                        '<br><a href="winner-portal.php" class="btn btn-warning btn-sm mt-2">' +
+                        '<i class="bi bi-bank me-2"></i>Claim Your Prize</a>';
+                    banner.style.display = '';
+                }
+            })
+            .catch(function() {});
+    }, 5000);
+})();
+</script>
+<?php endif; ?>
 
 <?php include 'includes/footer.php'; ?>
