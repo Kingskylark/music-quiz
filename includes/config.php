@@ -60,8 +60,8 @@ try {
  * Error Reporting (Disable in production)
  */
 // For development
-error_reporting(0);
-ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // For production (uncomment these)
 // error_reporting(0);
