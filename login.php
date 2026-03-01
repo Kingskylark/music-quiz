@@ -30,24 +30,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($result && $result->num_rows > 0) {
             $user = $result->fetch_assoc();
-            
-            // Check if quiz already completed
+
+            // Set session for ALL users (including completed)
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['session_id'] = $user['session_id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_nickname'] = $user['nickname'];
+
+            $success = 'Login successful! Redirecting...';
+
             if ($user['status'] === 'completed') {
-                $error = 'You have already completed the quiz. View your results on the leaderboard.';
+                header("refresh:1;url=results.php");
+            } elseif ($user['status'] === 'in_progress') {
+                header("refresh:1;url=quiz.php");
             } else {
-                // Set session
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['session_id'] = $user['session_id'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_nickname'] = $user['nickname'];
-                
-                $success = 'Login successful! Redirecting...';
-                
-                if ($user['status'] === 'in_progress') {
-                    header("refresh:1;url=quiz.php");
-                } else {
-                    header("refresh:1;url=quiz.php");
-                }
+                header("refresh:1;url=waiting.php");
             }
         } else {
             $error = 'Nickname not found. Please register first.';

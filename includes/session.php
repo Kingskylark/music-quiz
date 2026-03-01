@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 /**
  * Require user login (for quiz pages)
  */
-function require_user_login($redirect_to = 'register.php') {
+function require_user_login($redirect_to = 'login.php') {
     if (!check_user_session()) {
         redirect($redirect_to);
     }
