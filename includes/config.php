@@ -1,4 +1,8 @@
 <?php
+// Error reporting FIRST — before anything else
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 /**
  * Database Configuration
  * Update these values according to your server setup
@@ -56,14 +60,5 @@ try {
     die("Database Error: " . $e->getMessage());
 }
 
-/**
- * Error Reporting (Disable in production)
- */
-// For development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// For production (uncomment these)
-// error_reporting(0);
-// ini_set('display_errors', 0);
+// Error reporting is set at the top of this file
 ?>
