@@ -151,9 +151,9 @@ if ($top3_q) {
                             <!-- Player Info -->
                             <div class="col-md-4">
                                 <h6 class="text-warning mb-3">Player Info</h6>
-                                <p class="text-white mb-1"><strong>Name:</strong> <?php echo htmlspecialchars($w['name']); ?></p>
+                                <p class="text-white mb-1"><strong class="text-white">Name:</strong> <?php echo htmlspecialchars($w['name']); ?></p>
                                 <?php if (!empty($w['nickname'])): ?>
-                                <p class="text-white mb-1"><strong>Nickname:</strong> <?php echo htmlspecialchars($w['nickname']); ?></p>
+                                <p class="text-white mb-1"><strong class="text-white">Nickname:</strong> <?php echo htmlspecialchars($w['nickname']); ?></p>
                                 <?php endif; ?>
                                 <?php if (!empty($w['phone'])): ?>
                                 <p class="text-white mb-1"><strong>Phone:</strong> <?php echo htmlspecialchars($w['phone']); ?></p>

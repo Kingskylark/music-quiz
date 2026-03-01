@@ -259,9 +259,9 @@ if ($top3_q) {
                                         <tr>
                                             <td><span class="fw-bold text-warning"><?php echo $medals[$w['prize_rank']] ?? $w['prize_rank']; ?></span></td>
                                             <td>
-                                                <strong><?php echo htmlspecialchars($w['name']); ?></strong>
+                                                <strong class="text-white"><?php echo htmlspecialchars($w['name']); ?></strong>
                                                 <?php if (!empty($w['nickname'])): ?>
-                                                    <br><small class="text-muted">(<?php echo htmlspecialchars($w['nickname']); ?>)</small>
+                                                    <br><small class="text-light">(<?php echo htmlspecialchars($w['nickname']); ?>)</small>
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-center"><?php echo $w['score']; ?>/<?php echo TOTAL_QUESTIONS; ?></td>
