@@ -501,4 +501,39 @@ function process_payment_paystack($payment_id) {
     
     return ['success' => false, 'message' => 'Payment failed'];
 }
+
+/**
+ * Auto-mark top 3 winners if game is stopped and no winners exist
+ */
+function auto_mark_winners_if_needed() {
+    global $conn;
+
+    // Only run if game is stopped
+    if (is_game_active()) {
+        return false;
+    }
+
+    // Check if winners already exist
+    $check = $conn->query("SELECT COUNT(*) as c FROM users WHERE is_winner = 1");
+    if (!$check) return false;
+    $count = $check->fetch_assoc()['c'];
+    if ($count > 0) return false;
+
+    // Check if there are completed users
+    $completed = $conn->query("SELECT COUNT(*) as c FROM users WHERE status = 'completed'");
+    if (!$completed) return false;
+    if ($completed->fetch_assoc()['c'] == 0) return false;
+
+    // Mark top 3
+    $top3 = $conn->query("SELECT id FROM users WHERE status = 'completed' ORDER BY score DESC, total_time ASC LIMIT 3");
+    if (!$top3) return false;
+
+    $rank = 1;
+    while ($row = $top3->fetch_assoc()) {
+        $conn->query("UPDATE users SET is_winner = 1, prize_rank = $rank WHERE id = {$row['id']}");
+        $rank++;
+    }
+
+    return true;
+}
 ?>

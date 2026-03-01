@@ -10,6 +10,10 @@ if (!check_user_session()) {
 }
 
 $user_id = (int)$_SESSION['user_id'];
+
+// Auto-mark winners if game stopped and none marked yet
+auto_mark_winners_if_needed();
+
 $winner_info = is_winner($user_id);
 
 if ($winner_info['is_winner']) {
