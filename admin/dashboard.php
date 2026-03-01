@@ -268,9 +268,9 @@ if ($top3_q) {
                                             <td class="text-center text-success fw-bold"><?php echo number_format($prize); ?></td>
                                             <td>
                                                 <?php if (!empty($w['bank_name'])): ?>
-                                                    <strong><?php echo htmlspecialchars($w['bank_name']); ?></strong><br>
+                                                    <strong class="text-white"><?php echo htmlspecialchars($w['bank_name']); ?></strong><br>
                                                     <span class="text-light"><?php echo htmlspecialchars($w['account_number']); ?></span><br>
-                                                    <small class="text-muted"><?php echo htmlspecialchars($w['account_name']); ?></small>
+                                                    <small class="text-light"><?php echo htmlspecialchars($w['account_name']); ?></small>
                                                 <?php else: ?>
                                                     <span class="text-muted"><i class="bi bi-clock me-1"></i>Awaiting submission</span>
                                                 <?php endif; ?>
