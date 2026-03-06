@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // Get current winners (no JOIN — separate queries for reliability)
 $current_winners = [];
-$winners_q = $conn->query("SELECT id, name, nickname, phone, score, total_time, prize_rank FROM users WHERE is_winner = 1 ORDER BY prize_rank ASC");
+$winners_q = $conn->query("SELECT id, name, nickname, score, total_time, prize_rank FROM users WHERE is_winner = 1 ORDER BY prize_rank ASC");
 if ($winners_q) {
     while ($w = $winners_q->fetch_assoc()) {
         $uid = (int)$w['id'];
@@ -154,9 +154,6 @@ if ($top3_q) {
                                 <p class="text-white mb-1"><strong class="text-white">Name:</strong> <?php echo htmlspecialchars($w['name']); ?></p>
                                 <?php if (!empty($w['nickname'])): ?>
                                 <p class="text-white mb-1"><strong class="text-white">Nickname:</strong> <?php echo htmlspecialchars($w['nickname']); ?></p>
-                                <?php endif; ?>
-                                <?php if (!empty($w['phone'])): ?>
-                                <p class="text-white mb-1"><strong>Phone:</strong> <?php echo htmlspecialchars($w['phone']); ?></p>
                                 <?php endif; ?>
                                 <p class="text-white mb-1"><strong>Score:</strong> <?php echo $w['score']; ?>/<?php echo TOTAL_QUESTIONS; ?></p>
                                 <p class="text-white mb-0"><strong>Time:</strong> <?php echo format_time($w['total_time']); ?></p>

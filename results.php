@@ -61,7 +61,7 @@ $page_title = "Quiz Results";
                         <?php
 // Check if user is a winner
 $winner_info = is_winner($user['id']);
-if ($winner_info['is_winner'] && PAYMENT_ENABLED):
+if ($winner_info['is_winner'] && PAYMENT_ENABLED && !is_game_active()):
     $prize_amount = get_prize_amount($winner_info['rank']);
 ?>
     <div id="winnerBanner" class="alert alert-success mb-4 animate__animated animate__pulse">
@@ -144,7 +144,7 @@ if ($winner_info['is_winner'] && PAYMENT_ENABLED):
 
 
 
-<?php if (!$winner_info['is_winner'] && PAYMENT_ENABLED): ?>
+<?php if (!$winner_info['is_winner'] && PAYMENT_ENABLED && !is_game_active()): ?>
 <script>
 // Poll every 5 seconds to check if this user has been marked as a winner
 (function() {

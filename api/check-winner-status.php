@@ -11,6 +11,14 @@ if (!check_user_session()) {
 
 $user_id = (int)$_SESSION['user_id'];
 
+// Only check winners if game is stopped
+if (is_game_active()) {
+    json_response(true, 'Game still active', [
+        'is_winner' => false,
+        'game_active' => true
+    ]);
+}
+
 // Auto-mark winners if game stopped and none marked yet
 auto_mark_winners_if_needed();
 
