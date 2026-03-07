@@ -233,6 +233,17 @@ $page_title = "Register for Quiz";
                                         <strong class="text-success"><?php echo TOTAL_QUESTIONS; ?> points</strong>
                                     </div>
                                 </div>
+
+                                <!-- Rules -->
+                                <div class="alert alert-danger mb-4">
+                                    <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Important Rules</h6>
+                                    <ul class="mb-0 small">
+                                        <li>Do <strong>NOT</strong> leave or switch tabs/apps during the quiz — you will be <strong>automatically disqualified</strong>.</li>
+                                        <li>Do <strong>NOT</strong> minimize your browser while playing.</li>
+                                        <li>Each question has a <?php echo QUIZ_TIME_PER_QUESTION; ?>-second time limit. Unanswered questions count as wrong.</li>
+                                        <li>Once you start, you must finish — there is no pausing.</li>
+                                    </ul>
+                                </div>
                                 
                                 <!-- Terms Checkbox -->
                                 <div class="form-check mb-4">

@@ -13,19 +13,23 @@ $message = '';
 // Handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'mark_winners') {
-        $conn->query("UPDATE users SET is_winner = 0, prize_rank = NULL");
+        if (is_game_active()) {
+            $message = 'You must stop the game before marking winners!';
+        } else {
+            $conn->query("UPDATE users SET is_winner = 0, prize_rank = NULL");
 
-        $top3_query = "SELECT id FROM users WHERE status = 'completed' ORDER BY score DESC, total_time ASC LIMIT 3";
-        $top3_result = $conn->query($top3_query);
+            $top3_query = "SELECT id FROM users WHERE status = 'completed' ORDER BY score DESC, total_time ASC LIMIT 3";
+            $top3_result = $conn->query($top3_query);
 
-        $rank = 1;
-        if ($top3_result) {
-            while ($winner = $top3_result->fetch_assoc()) {
-                $conn->query("UPDATE users SET is_winner = 1, prize_rank = $rank WHERE id = {$winner['id']}");
-                $rank++;
+            $rank = 1;
+            if ($top3_result) {
+                while ($winner = $top3_result->fetch_assoc()) {
+                    $conn->query("UPDATE users SET is_winner = 1, prize_rank = $rank WHERE id = {$winner['id']}");
+                    $rank++;
+                }
             }
+            $message = 'Top 3 winners marked successfully!';
         }
-        $message = 'Top 3 winners marked successfully!';
 
     } elseif ($_POST['action'] === 'mark_paid' && isset($_POST['user_id'])) {
         $uid = (int)$_POST['user_id'];
@@ -38,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $message = 'Payment status reset to pending.';
     }
 }
+
+$game_active = is_game_active();
 
 // Get current winners (no JOIN — separate queries for reliability)
 $current_winners = [];
@@ -110,7 +116,7 @@ if ($top3_q) {
                 </div>
                 <form method="POST" action="">
                     <input type="hidden" name="action" value="mark_winners">
-                    <button type="submit" class="btn btn-warning" onclick="return confirm('Mark top 3 completed players as winners?');">
+                    <button type="submit" class="btn btn-warning" <?php echo $game_active ? 'disabled title="Stop the game first"' : 'onclick="return confirm(\'Mark top 3 completed players as winners?\');"'; ?>>
                         <i class="bi bi-trophy me-1"></i>Mark Top 3 as Winners
                     </button>
                 </form>
