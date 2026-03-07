@@ -14,9 +14,6 @@ if ($user['status'] !== 'completed') {
     redirect('quiz.php');
 }
 
-// Auto-mark winners if game is stopped and no winners exist yet
-auto_mark_winners_if_needed();
-
 // Get user's answers breakdown
 $correct_query = "SELECT COUNT(*) as correct FROM answers WHERE user_id = {$user['id']} AND is_correct = 1";
 $correct_result = $conn->query($correct_query);

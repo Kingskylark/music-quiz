@@ -24,21 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $game_active = !$game_active;
 
         if (!$game_active) {
-            // Game just stopped — auto-mark top 3 winners
-            $conn->query("UPDATE users SET is_winner = 0, prize_rank = NULL");
-
-            $top3_query = "SELECT id FROM users WHERE status = 'completed' ORDER BY score DESC, total_time ASC LIMIT 3";
-            $top3_result = $conn->query($top3_query);
-
-            $rank = 1;
-            if ($top3_result) {
-                while ($winner = $top3_result->fetch_assoc()) {
-                    $conn->query("UPDATE users SET is_winner = 1, prize_rank = $rank WHERE id = {$winner['id']}");
-                    $rank++;
-                }
-            }
-            $winners_count = $rank - 1;
-            $message = "Game stopped! $winners_count winner(s) marked automatically.";
+            $message = 'Game stopped! Use "Mark Top 3" to select winners.';
         } else {
             $message = 'Game started successfully!';
         }
@@ -329,7 +315,7 @@ if ($top3_q) {
                                             </tbody>
                                         </table>
                                     </div>
-                                    <p class="text-warning small">Click "Mark Top 3" above or stop the game to auto-mark winners.</p>
+                                    <p class="text-warning small">Click "Mark Top 3" above to select winners.</p>
                                 <?php else: ?>
                                     <p class="text-muted small">No completed players yet.</p>
                                 <?php endif; ?>
@@ -354,7 +340,7 @@ if ($top3_q) {
                             <h3 class="text-white mb-3">Game is <?php echo $game_active ? 'ACTIVE' : 'STOPPED'; ?></h3>
                             <?php if ($game_active): ?>
                                 <p class="text-success">Players can now start the quiz!</p>
-                                <p class="text-warning small"><i class="bi bi-info-circle me-1"></i>Stopping the game will automatically mark the top 3 players as winners</p>
+                                <p class="text-warning small"><i class="bi bi-info-circle me-1"></i>After stopping, use "Mark Top 3" to select winners</p>
                             <?php else: ?>
                                 <p class="text-light">Players are waiting for you to start the game</p>
                             <?php endif; ?>

@@ -250,7 +250,7 @@ if ($top3_q) {
                                 </tbody>
                             </table>
                         </div>
-                        <p class="text-warning small">Click "Mark Top 3 as Winners" above or stop the game to auto-mark winners.</p>
+                        <p class="text-warning small">Click "Mark Top 3 as Winners" above to select winners.</p>
                         <?php else: ?>
                         <p class="text-muted">No completed players yet. Winners will appear here once the game is stopped.</p>
                         <?php endif; ?>

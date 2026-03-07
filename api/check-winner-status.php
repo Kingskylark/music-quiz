@@ -19,9 +19,6 @@ if (is_game_active()) {
     ]);
 }
 
-// Auto-mark winners if game stopped and none marked yet
-auto_mark_winners_if_needed();
-
 $winner_info = is_winner($user_id);
 
 if ($winner_info['is_winner']) {
