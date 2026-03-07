@@ -66,8 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($conn->query($insert_query)) {
         $user_id = $conn->insert_id;
         
-        // Set session variables
-        session_start();
+        // Set session variables (session already started by config.php)
         $_SESSION['user_id'] = $user_id;
         $_SESSION['session_id'] = $session_id;
         

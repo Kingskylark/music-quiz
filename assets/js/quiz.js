@@ -56,11 +56,7 @@ function loadNextQuestion() {
     $('#loadingState').show();
     $('#questionContent').hide();
     $('#feedbackMessage').hide();
-    
-    // Clear previous answers
-    $('input[name="answer"]').prop('checked', false).prop('disabled', false);
-    $('.btn-option').removeClass('selected correct incorrect disabled');
-    
+
     // Stop any running timer
     if (timerInterval) {
         clearInterval(timerInterval);
@@ -109,30 +105,38 @@ function displayQuestion(question) {
     currentProgress++;
     updateProgress(currentProgress);
 
-    // Aggressively reset all radio buttons and visual state
-    $('input[name="answer"]').prop('checked', false).prop('disabled', false);
-    $('.btn-option').removeClass('selected correct incorrect disabled');
-    // Force DOM update to clear :checked CSS state
-    $('input[name="answer"]').each(function() {
-        this.checked = false;
-    });
-
     // Fill in question data
     $('#questionCategory').text(question.category);
     $('#questionText').text(question.question_text);
-    $('#optionAText').text(question.option_a);
-    $('#optionBText').text(question.option_b);
-    $('#optionCText').text(question.option_c);
-    $('#optionDText').text(question.option_d);
+
+    // Rebuild options HTML completely to eliminate any stale checked/selected state
+    var options = [
+        {letter: 'A', text: question.option_a},
+        {letter: 'B', text: question.option_b},
+        {letter: 'C', text: question.option_c},
+        {letter: 'D', text: question.option_d}
+    ];
+
+    var optionsHtml = '';
+    options.forEach(function(opt) {
+        optionsHtml += '<div class="option-item" data-option="' + opt.letter + '">' +
+            '<input type="radio" class="btn-check" name="answer" id="option' + opt.letter + '" value="' + opt.letter + '" autocomplete="off">' +
+            '<label class="btn btn-option w-100 text-start" for="option' + opt.letter + '">' +
+            '<span class="option-letter">' + opt.letter + '</span>' +
+            '<span class="option-text">' + $('<span>').text(opt.text).html() + '</span>' +
+            '</label></div>';
+    });
+
+    $('#optionsContainer').html(optionsHtml);
 
     // Show question
     $('#loadingState').hide();
     $('#questionContent').show();
 
-    // Add click handlers
-    $('.btn-option').off('click').on('click', function() {
+    // Add click handlers to fresh elements
+    $('.btn-option').on('click', function() {
         if (!isProcessing) {
-            const option = $(this).prev('input').val();
+            var option = $(this).prev('input').val();
             selectOption(option);
         }
     });
