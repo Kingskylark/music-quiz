@@ -63,9 +63,9 @@ if ($conn->query($insert_query)) {
     $progress = get_user_progress($user_id);
     $score = calculate_score($user_id);
     
-    // Check if quiz is completed
-    $is_completed = ($progress >= TOTAL_QUESTIONS);
-    
+    // Check if quiz is completed OR if admin stopped the game
+    $is_completed = ($progress >= TOTAL_QUESTIONS) || !is_game_active();
+
     if ($is_completed) {
         // Finalize quiz
         finalize_user_quiz($user_id);
