@@ -35,12 +35,25 @@ function get_ip_address() {
 }
 
 /**
- * Check if user session exists
+ * Check if user session exists and is valid (matches database)
  */
 function check_user_session() {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_id'])) {
         return false;
     }
+
+    // Validate session_id against database to prevent shared/stale sessions
+    global $conn;
+    $user_id = (int)$_SESSION['user_id'];
+    $session_id = $conn->real_escape_string($_SESSION['session_id']);
+    $result = $conn->query("SELECT id FROM users WHERE id = $user_id AND session_id = '$session_id' LIMIT 1");
+
+    if (!$result || $result->num_rows === 0) {
+        // Session doesn't match DB — another device logged in or session is stale
+        unset($_SESSION['user_id'], $_SESSION['session_id'], $_SESSION['user_name'], $_SESSION['user_nickname']);
+        return false;
+    }
+
     return true;
 }
 

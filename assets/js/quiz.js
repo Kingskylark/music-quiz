@@ -8,18 +8,34 @@ let timeLeft = TIME_PER_QUESTION;
 let isProcessing = false;
 let currentProgress = CURRENT_PROGRESS;
 
+let quizFinished = false;
+
 // Initialize quiz
 $(document).ready(function() {
     console.log('🎮 Quiz Starting...');
     console.log('User ID:', USER_ID);
     console.log('Progress:', CURRENT_PROGRESS);
-    
-    // Disable page refresh warning temporarily to debug
-    // window.addEventListener('beforeunload', function(e) {
-    //     e.preventDefault();
-    //     e.returnValue = '';
-    // });
-    
+
+    // Warn user before leaving/reloading during quiz
+    window.addEventListener('beforeunload', function(e) {
+        if (!quizFinished) {
+            e.preventDefault();
+            e.returnValue = 'You will be disqualified if you leave! Are you sure?';
+            return e.returnValue;
+        }
+    });
+
+    // Detect tab switch / minimize — disqualify immediately
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && !quizFinished) {
+            // Send disqualify request using sendBeacon (works even when page is closing)
+            navigator.sendBeacon('api/disqualify.php', '');
+            quizFinished = true;
+            alert('You left the quiz! You have been disqualified.');
+            window.location.href = 'results.php';
+        }
+    });
+
     // Load first question immediately
     setTimeout(function() {
         loadNextQuestion();
@@ -88,11 +104,19 @@ function loadNextQuestion() {
  */
 function displayQuestion(question) {
     console.log('📝 Displaying question:', question.id);
-    
+
     // Update progress
     currentProgress++;
     updateProgress(currentProgress);
-    
+
+    // Aggressively reset all radio buttons and visual state
+    $('input[name="answer"]').prop('checked', false).prop('disabled', false);
+    $('.btn-option').removeClass('selected correct incorrect disabled');
+    // Force DOM update to clear :checked CSS state
+    $('input[name="answer"]').each(function() {
+        this.checked = false;
+    });
+
     // Fill in question data
     $('#questionCategory').text(question.category);
     $('#questionText').text(question.question_text);
@@ -100,11 +124,11 @@ function displayQuestion(question) {
     $('#optionBText').text(question.option_b);
     $('#optionCText').text(question.option_c);
     $('#optionDText').text(question.option_d);
-    
+
     // Show question
     $('#loadingState').hide();
     $('#questionContent').show();
-    
+
     // Add click handlers
     $('.btn-option').off('click').on('click', function() {
         if (!isProcessing) {
@@ -119,7 +143,11 @@ function displayQuestion(question) {
  */
 function startTimer() {
     console.log('⏰ Timer started');
-    
+
+    // Reset timer color
+    $('#timeLeft').removeClass('text-danger').addClass('text-warning');
+    $('#timeLeft').text(timeLeft);
+
     if (timerInterval) {
         clearInterval(timerInterval);
     }
@@ -263,7 +291,8 @@ function updateProgress(current) {
  */
 function finishQuiz() {
     console.log('🏆 Quiz completed!');
-    
+    quizFinished = true;
+
     $('#questionContent').html(`
         <div class="text-center py-5">
             <i class="bi bi-trophy-fill display-1 text-success mb-3"></i>

@@ -5,12 +5,12 @@ require_once 'includes/functions.php';
 // If user already has active session, redirect
 if (check_user_session()) {
     $user = get_user_data();
-    if ($user['status'] === 'completed') {
+    if ($user && $user['status'] === 'completed') {
         redirect('results.php');
-    } elseif ($user['status'] === 'in_progress') {
+    } elseif ($user && $user['status'] === 'in_progress') {
         redirect('quiz.php');
     } else {
-        redirect('quiz.php');
+        redirect('waiting.php');
     }
 }
 
@@ -20,34 +20,44 @@ $success = '';
 // Handle login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nickname = clean_input($_POST['nickname'] ?? '');
-    
-    if (empty($nickname)) {
-        $error = 'Please enter your nickname';
+    $raw_password = $_POST['password'] ?? '';
+
+    if (empty($nickname) || empty($raw_password)) {
+        $error = 'Please enter your username and password.';
     } else {
         // Find user by nickname
         $query = "SELECT * FROM users WHERE nickname = '$nickname' LIMIT 1";
         $result = $conn->query($query);
-        
+
         if ($result && $result->num_rows > 0) {
             $user = $result->fetch_assoc();
 
-            // Set session for ALL users (including completed)
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['session_id'] = $user['session_id'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_nickname'] = $user['nickname'];
-
-            $success = 'Login successful! Redirecting...';
-
-            if ($user['status'] === 'completed') {
-                header("refresh:1;url=results.php");
-            } elseif ($user['status'] === 'in_progress') {
-                header("refresh:1;url=quiz.php");
+            // Verify password
+            if (!$user['password'] || !password_verify($raw_password, $user['password'])) {
+                $error = 'Incorrect password. Please try again.';
             } else {
-                header("refresh:1;url=waiting.php");
+                // Generate new session_id to invalidate any other device
+                $new_session_id = generate_session_id();
+                $conn->query("UPDATE users SET session_id = '$new_session_id' WHERE id = {$user['id']}");
+
+                // Set session
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['session_id'] = $new_session_id;
+                $_SESSION['user_name'] = $user['name'];
+                $_SESSION['user_nickname'] = $user['nickname'];
+
+                $success = 'Login successful! Redirecting...';
+
+                if ($user['status'] === 'completed') {
+                    header("refresh:1;url=results.php");
+                } elseif ($user['status'] === 'in_progress') {
+                    header("refresh:1;url=quiz.php");
+                } else {
+                    header("refresh:1;url=waiting.php");
+                }
             }
         } else {
-            $error = 'Nickname not found. Please register first.';
+            $error = 'Username not found. Please register first.';
         }
     }
 }
@@ -68,9 +78,9 @@ $page_title = "Login";
                                 <i class="bi bi-box-arrow-in-right display-3 text-success"></i>
                             </div>
                             <h3 class="mt-3 fw-bold text-white">Continue Quiz</h3>
-                            <p class="text-light small">Login with your nickname</p>
+                            <p class="text-light small">Login with your username and password</p>
                         </div>
-                        
+
                         <?php if ($error): ?>
                             <div class="alert alert-danger alert-dismissible fade show">
                                 <i class="bi bi-exclamation-circle-fill me-2"></i>
@@ -78,44 +88,57 @@ $page_title = "Login";
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
-                        
+
                         <?php if ($success): ?>
                             <div class="alert alert-success">
                                 <i class="bi bi-check-circle-fill me-2"></i>
                                 <?php echo $success; ?>
                             </div>
                         <?php endif; ?>
-                        
+
                         <form method="POST" action="">
                             <div class="mb-4">
                                 <label for="nickname" class="form-label text-light">
-                                    <i class="bi bi-tag-fill me-2"></i>Your Nickname
+                                    <i class="bi bi-tag-fill me-2"></i>Username
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control form-control-lg" 
-                                    id="nickname" 
-                                    name="nickname" 
-                                    placeholder="Enter your nickname"
+                                <input
+                                    type="text"
+                                    class="form-control form-control-lg"
+                                    id="nickname"
+                                    name="nickname"
+                                    placeholder="Enter your username"
                                     required
                                     value="<?php echo isset($_POST['nickname']) ? htmlspecialchars($_POST['nickname']) : ''; ?>"
                                 >
-                                <small class="text-dark">The nickname you used during registration</small>
                             </div>
-                            
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label text-light">
+                                    <i class="bi bi-lock-fill me-2"></i>Password
+                                </label>
+                                <input
+                                    type="password"
+                                    class="form-control form-control-lg"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    required
+                                >
+                            </div>
+
                             <div class="d-grid gap-2 mb-3">
                                 <button type="submit" class="btn btn-success btn-lg">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Login & Continue
                                 </button>
                             </div>
-                            
+
                             <div class="text-center">
-                                <p class="text-dark small mb-2">Don't have an account?</p>
+                                <p class="text-light small mb-2">Don't have an account?</p>
                                 <a href="register.php" class="text-success text-decoration-none">
                                     <i class="bi bi-person-plus me-1"></i>Register Here
                                 </a>
                                 <span class="text-muted mx-2">|</span>
-                                <a href="index.php" class="text-dark text-decoration-none">
+                                <a href="index.php" class="text-light text-decoration-none">
                                     <i class="bi bi-house me-1"></i>Home
                                 </a>
                             </div>

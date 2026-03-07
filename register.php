@@ -16,13 +16,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         echo json_encode(['success' => false, 'message' => 'Username/Nickname is required']);
         exit;
     }
-    
+
+    if (!isset($_POST['password']) || empty($_POST['password'])) {
+        echo json_encode(['success' => false, 'message' => 'Password is required']);
+        exit;
+    }
+
     $nickname = clean_input($_POST['nickname']);
     $name = isset($_POST['name']) && !empty($_POST['name']) ? clean_input($_POST['name']) : $nickname;
-    
+    $raw_password = $_POST['password'];
+
     // Validate nickname length
     if (strlen($nickname) < 3) {
         echo json_encode(['success' => false, 'message' => 'Username must be at least 3 characters']);
+        exit;
+    }
+
+    // Validate password length
+    if (strlen($raw_password) < 4) {
+        echo json_encode(['success' => false, 'message' => 'Password must be at least 4 characters']);
         exit;
     }
     
@@ -42,13 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     }
     
-    // Generate session ID
+    // Generate session ID and hash password
     $session_id = generate_session_id();
     $ip_address = get_ip_address();
-    
+    $hashed_password = password_hash($raw_password, PASSWORD_DEFAULT);
+
     // Insert user into database
-    $insert_query = "INSERT INTO users (name, nickname, session_id, ip_address, status, registered_at) 
-                     VALUES ('$name', '$nickname', '$session_id', '$ip_address', 'not_started', NOW())";
+    $insert_query = "INSERT INTO users (name, nickname, password, session_id, ip_address, status, registered_at)
+                     VALUES ('$name', '$nickname', '$hashed_password', '$session_id', '$ip_address', 'not_started', NOW())";
     
     if ($conn->query($insert_query)) {
         $user_id = $conn->insert_id;
@@ -173,11 +186,11 @@ $page_title = "Register for Quiz";
                                     <label for="nickname" class="form-label text-light">
                                         <i class="bi bi-tag-fill me-2"></i>Username *
                                     </label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control form-control-lg" 
-                                        id="nickname" 
-                                        name="nickname" 
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-lg"
+                                        id="nickname"
+                                        name="nickname"
                                         placeholder="Choose a unique username"
                                         required
                                         minlength="3"
@@ -185,10 +198,27 @@ $page_title = "Register for Quiz";
                                         aria-required="true"
                                     >
                                     <small class="text-light">
-                                        <strong>Remember this!</strong> You'll use it to login if you need to continue later.
+                                        <strong>Remember this!</strong> You'll use it to login.
                                     </small>
                                 </div>
-                                
+
+                                <div class="mb-4">
+                                    <label for="password" class="form-label text-light">
+                                        <i class="bi bi-lock-fill me-2"></i>Password *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        class="form-control form-control-lg"
+                                        id="password"
+                                        name="password"
+                                        placeholder="Choose a password"
+                                        required
+                                        minlength="4"
+                                        maxlength="50"
+                                    >
+                                    <small class="text-light">At least 4 characters. You'll need this to login.</small>
+                                </div>
+
                                 <!-- Quiz Info -->
                                 <div class="quiz-info-box mb-4">
                                     <div class="d-flex justify-content-between mb-2">
