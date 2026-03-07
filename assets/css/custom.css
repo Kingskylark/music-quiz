@@ -509,15 +509,14 @@ body {
     opacity: 0.6;
 }
 
-/* Hide default radio buttons and disable Bootstrap :checked styling */
+/* Hide default radio buttons */
 .btn-check {
     display: none;
 }
 
-.btn-check:checked + .btn-option {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: white;
+/* Ensure option buttons have pointer cursor */
+.btn-option {
+    cursor: pointer;
 }
 
 /* Responsive */

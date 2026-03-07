@@ -109,7 +109,7 @@ function displayQuestion(question) {
     $('#questionCategory').text(question.category);
     $('#questionText').text(question.question_text);
 
-    // Rebuild options HTML completely to eliminate any stale checked/selected state
+    // Rebuild options as plain divs (no radio inputs = no :checked state issues)
     var options = [
         {letter: 'A', text: question.option_a},
         {letter: 'B', text: question.option_b},
@@ -120,11 +120,10 @@ function displayQuestion(question) {
     var optionsHtml = '';
     options.forEach(function(opt) {
         optionsHtml += '<div class="option-item" data-option="' + opt.letter + '">' +
-            '<input type="radio" class="btn-check" name="answer" id="option' + opt.letter + '" value="' + opt.letter + '" autocomplete="off">' +
-            '<label class="btn btn-option w-100 text-start" for="option' + opt.letter + '">' +
+            '<div class="btn btn-option w-100 text-start" data-value="' + opt.letter + '">' +
             '<span class="option-letter">' + opt.letter + '</span>' +
             '<span class="option-text">' + $('<span>').text(opt.text).html() + '</span>' +
-            '</label></div>';
+            '</div></div>';
     });
 
     $('#optionsContainer').html(optionsHtml);
@@ -136,7 +135,7 @@ function displayQuestion(question) {
     // Add click handlers to fresh elements
     $('.btn-option').on('click', function() {
         if (!isProcessing) {
-            var option = $(this).prev('input').val();
+            var option = $(this).data('value');
             selectOption(option);
         }
     });
@@ -179,13 +178,13 @@ function startTimer() {
  */
 function selectOption(option) {
     if (isProcessing) return;
-    
+
     console.log('👆 Selected:', option);
-    
+
     // Visual feedback
     $('.btn-option').removeClass('selected');
-    $('#option' + option).next('label').addClass('selected');
-    
+    $('.btn-option[data-value="' + option + '"]').addClass('selected');
+
     // Submit after short delay
     setTimeout(function() {
         submitAnswer(option);
@@ -206,7 +205,6 @@ function submitAnswer(selectedOption) {
     
     // Disable buttons
     $('.btn-option').addClass('disabled');
-    $('input[name="answer"]').prop('disabled', true);
     
     // Calculate time taken
     const timeTaken = TIME_PER_QUESTION - timeLeft;
@@ -258,7 +256,7 @@ function showFeedback(data) {
     $('#currentScore').text(data.score);
     
     // Highlight correct answer
-    $('#option' + data.correct_option).next('label').addClass('correct');
+    $('.btn-option[data-value="' + data.correct_option + '"]').addClass('correct');
     
     // Show message
     let html = '';
