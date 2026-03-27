@@ -60,7 +60,19 @@ $page_title = "Quiz Results";
 $winner_info = is_winner($user['id']);
 if ($winner_info['is_winner'] && PAYMENT_ENABLED && !is_game_active()):
     $prize_amount = get_prize_amount($winner_info['rank']);
+    $payment = get_payment_status($user['id']);
 ?>
+    <?php if ($payment && $payment['payment_status'] === 'completed'): ?>
+    <div id="winnerBanner" class="alert alert-success mb-4">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <strong>Prize Claimed & Paid!</strong> Your ₦<?php echo number_format($prize_amount, 2); ?> has been sent to your account.
+    </div>
+    <?php elseif ($payment && $payment['bank_name']): ?>
+    <div id="winnerBanner" class="alert alert-info mb-4">
+        <i class="bi bi-clock-fill me-2"></i>
+        <strong>Prize Claimed!</strong> Your bank details have been submitted. Payment of ₦<?php echo number_format($prize_amount, 2); ?> is being processed.
+    </div>
+    <?php else: ?>
     <div id="winnerBanner" class="alert alert-success mb-4 animate__animated animate__pulse">
         <i class="bi bi-trophy-fill me-2"></i>
         <strong>You're a Winner!</strong> You've won ₦<?php echo number_format($prize_amount, 2); ?>!
@@ -69,6 +81,7 @@ if ($winner_info['is_winner'] && PAYMENT_ENABLED && !is_game_active()):
             <i class="bi bi-bank me-2"></i>Claim Your Prize
         </a>
     </div>
+    <?php endif; ?>
 <?php else: ?>
     <!-- Placeholder that will be filled by polling if user becomes a winner -->
     <div id="winnerBanner" class="mb-4" style="display:none;"></div>
