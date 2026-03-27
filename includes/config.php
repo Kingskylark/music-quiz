@@ -12,7 +12,7 @@ define('PAYMENT_ENABLED', true);
 
 // Prize amounts (in NGN)
 define('FIRST_PRIZE', 10000);    // ₦10,000
-define('SECOND_PRIZE', 7000);   // ₦7,000
+define('SECOND_PRIZE', 7500);   // ₦7,500
 define('THIRD_PRIZE', 5000);    // ₦5,000
 
 // Start session if not already started
